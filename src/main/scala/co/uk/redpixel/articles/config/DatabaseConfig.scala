@@ -1,7 +1,7 @@
 package co.uk.redpixel.articles.config
 
 import co.uk.redpixel.articles.config.DatabaseConfig.{Password, UserName}
-import eu.timepit.refined.types.all.NonEmptyString
+import eu.timepit.refined.types.all.{NonEmptyString, PosInt}
 
 import java.net.URI
 
@@ -10,7 +10,7 @@ final case class DatabaseConfig(jdbcUrl: URI,
                                 user: UserName,
                                 password: Password,
                                 whetherCreateSchema: Boolean,
-                                threadPoolSize: Int)
+                                threadPoolSize: PosInt)
 
 object DatabaseConfig {
 

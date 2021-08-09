@@ -1,9 +1,12 @@
 package co.uk.redpixel.articles.persistence
 
 import cats.Monad
+import cats.effect.{Async, Resource}
 import cats.implicits.{catsSyntaxApplicativeId, catsSyntaxOptionId}
 import co.uk.redpixel.articles.config.DatabaseConfig
 import doobie.hikari.HikariTransactor
+import doobie.util.ExecutionContexts
+import eu.timepit.refined.auto._
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.output.MigrateResult
 
@@ -26,5 +29,18 @@ object Database {
     }
 
     Monad[F].ifM(F.pure(config.whetherCreateSchema))(migrateSchema(), F.pure(None))
+  }
+
+  def connect[F[_] : Async](config: DatabaseConfig): Resource[F, HikariTransactor[F]] = {
+    for {
+      ec <- ExecutionContexts.fixedThreadPool[F](config.threadPoolSize)
+      xa <- HikariTransactor.newHikariTransactor[F](
+        driverClassName = config.driverClassName,
+        url = config.jdbcUrl.toString,
+        user = config.user,
+        pass = config.password,
+        connectEC = ec
+      )
+    } yield xa
   }
 }

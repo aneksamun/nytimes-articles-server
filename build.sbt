@@ -1,7 +1,7 @@
 val Http4sVersion = "0.23.0"
 val DoobieVersion = "1.0.0-M5"
 val CirceVersion = "0.14.1"
-val PureConfigVersion = "0.14.0"
+val PureConfigVersion = "0.16.0"
 val PureConfigRefinedVersion = "0.9.27"
 val LogbackVersion = "1.2.5"
 val FlywayVersion = "7.12.1"
@@ -14,7 +14,6 @@ lazy val root = (project in file("."))
     scalaVersion := "2.13.6",
     libraryDependencies ++= Seq(
       "org.http4s"            %% "http4s-ember-server" % Http4sVersion,
-      "org.http4s"            %% "http4s-ember-client" % Http4sVersion,
       "org.http4s"            %% "http4s-circe"        % Http4sVersion,
       "org.http4s"            %% "http4s-dsl"          % Http4sVersion,
       "org.tpolecat"          %% "doobie-core"         % DoobieVersion,
@@ -31,3 +30,23 @@ lazy val root = (project in file("."))
     addCompilerPlugin("com.olegpy"    %% "better-monadic-for" % "0.3.1"),
     assembly / mainClass := Some("co.uk.redpixel.articles.Main")
   )
+
+scalacOptions ++= Seq(
+  "-deprecation",
+  "-encoding", "UTF-8",
+  "-explaintypes",
+  "-language:higherKinds",
+  "-language:postfixOps",
+  "-language:implicitConversions",
+  "-language:existentials",
+  "-feature",
+  "-Xfatal-warnings",
+  "-Ywarn-dead-code",
+  "-Ywarn-extra-implicit",
+  "-Ywarn-unused:implicits",
+  "-Ywarn-unused:imports",
+  "-Ywarn-unused:locals",
+  "-Ywarn-unused:params",
+  "-Ywarn-unused:privates",
+  "-Ywarn-value-discard"
+)
