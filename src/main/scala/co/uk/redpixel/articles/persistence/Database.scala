@@ -1,15 +1,14 @@
 package co.uk.redpixel.articles.persistence
 
-import cats.Monad
-import cats.effect.{Async, Resource}
+import cats.effect.{Resource, Sync}
 import cats.implicits.{catsSyntaxApplicativeId, catsSyntaxOptionId}
+import cats.{Applicative, Monad}
 import co.uk.redpixel.articles.config.DatabaseConfig
-import doobie.hikari.HikariTransactor
-import doobie.util.ExecutionContexts
-import eu.timepit.refined.auto._
+import com.zaxxer.hikari.HikariDataSource
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.output.MigrateResult
 
+import javax.sql.DataSource
 import scala.util.Try
 
 object Database {
@@ -17,30 +16,25 @@ object Database {
   type MigrationResult = Either[Throwable, MigrateResult]
 
   def createSchema[F[_]](config: DatabaseConfig)
-                        (xa: HikariTransactor[F])
+                        (dataSource: DataSource)
                         (implicit F: Monad[F]): F[Option[MigrationResult]] = {
-    def migrateSchema() = {
-      xa.configure { dataSource =>
-        Try(Flyway.configure()
-          .dataSource(dataSource)
-          .load()
-          .migrate()).toEither.some.pure[F]
-      }
-    }
+    def migrateSchema() =
+      Try(Flyway.configure()
+        .dataSource(dataSource)
+        .load()
+        .migrate()).toEither.some.pure[F]
 
     Monad[F].ifM(F.pure(config.whetherCreateSchema))(migrateSchema(), F.pure(None))
   }
 
-  def connect[F[_] : Async](config: DatabaseConfig): Resource[F, HikariTransactor[F]] = {
-    for {
-      ec <- ExecutionContexts.fixedThreadPool[F](config.threadPoolSize)
-      xa <- HikariTransactor.newHikariTransactor[F](
-        driverClassName = config.driverClassName,
-        url = config.jdbcUrl.toString,
-        user = config.user,
-        pass = config.password,
-        connectEC = ec
-      )
-    } yield xa
+  def createSource[F[_] : Sync](config: DatabaseConfig): Resource[F, HikariDataSource] = {
+    Resource.fromAutoCloseable(Applicative[F].pure(
+      HikariConnectionPool.builder
+        .withUser(config.user)
+        .withPassword(config.password)
+        .withDriverClassName(config.driverClassName)
+        .withJdbcUrl(config.jdbcUrl)
+        .build
+    ))
   }
 }

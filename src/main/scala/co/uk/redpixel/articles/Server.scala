@@ -3,7 +3,7 @@ package co.uk.redpixel.articles
 import cats.effect.{Async, Resource}
 import cats.syntax.all._
 import co.uk.redpixel.articles.config.ApplicationConfig
-import co.uk.redpixel.articles.persistence.DoobieNewsStore
+import co.uk.redpixel.articles.persistence.{Database, QuillNewsStore}
 import co.uk.redpixel.articles.routes.{GraphQL, HealthCheck}
 import com.comcast.ip4s._
 import fs2.Stream
@@ -18,15 +18,15 @@ object NewYorkTimesArticlesServer {
       // configuration
       config <- Stream.eval(ApplicationConfig.loadOrThrow[F])
 
-//      // database
-//      xa <- Stream.resource(Database.connect[F](config.db))
-//      _  <- Stream.eval(Database.createSchema[F](config.db)(xa))
+      // database
+      dataSource <- Stream.resource(Database.createSource[F](config.db))
+      _  <- Stream.eval(Database.createSchema[F](config.db)(dataSource))
 
-      newsStore = new DoobieNewsStore[F]
+      newsStore = QuillNewsStore[F](dataSource)
 
       // routes
       routes = (
-        GraphQL.routes[F] <+>
+        GraphQL.routes[F](newsStore) <+>
         HealthCheck.routes[F](newsStore)
       ).orNotFound
 
