@@ -8,6 +8,8 @@ val PostgresVersion = "42.2.23"
 val QuillVersion = "3.9.0"
 val KindProjectorVersion = "0.13.0"
 val BetterMonadicVersion = "0.3.1"
+val SangriaVersion = "2.1.3"
+val SangriaCirceVersion = "1.3.2"
 
 lazy val root = (project in file("."))
   .settings(
@@ -23,6 +25,8 @@ lazy val root = (project in file("."))
       "io.circe"              %% "circe-generic"        % CirceVersion,
       "com.github.pureconfig" %% "pureconfig"           % PureConfigVersion,
       "eu.timepit"            %% "refined-pureconfig"   % PureConfigRefinedVersion,
+      "org.sangria-graphql"   %% "sangria"              % SangriaVersion,
+      "org.sangria-graphql"   %% "sangria-circe"        % SangriaCirceVersion,
       "ch.qos.logback"        %  "logback-classic"      % LogbackVersion,
       "org.flywaydb"          %  "flyway-core"          % FlywayVersion,
       "org.postgresql"        %  "postgresql"           % PostgresVersion

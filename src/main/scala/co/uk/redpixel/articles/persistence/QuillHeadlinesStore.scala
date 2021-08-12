@@ -3,6 +3,7 @@ package co.uk.redpixel.articles.persistence
 import cats.effect.Async
 import cats.syntax.all._
 import co.uk.redpixel.articles.algebra.HeadlinesStore
+import co.uk.redpixel.articles.data.Headlines
 
 import scala.concurrent.ExecutionContext
 import com.github.mauricio.async.db.util.ExecutorServiceUtils._
@@ -18,10 +19,16 @@ class QuillHeadlinesStore[F[_] : Async, N <: NamingStrategy] private(ctx: Postgr
       .recoverWith { _ =>
         false.pure[F]
       }
+
+  def listAll(): F[Seq[Headlines]] = Async[F].fromFuture {
+    Async[F] delay ctx.run(quote {
+      query[Headlines].sortBy(_.title)
+    })
+  }
 }
 
 object QuillHeadlinesStore {
 
   def apply[F[_]: Async](): HeadlinesStore[F] =
-    new QuillHeadlinesStore(new PostgresAsyncContext(Literal, "db"))
+    new QuillHeadlinesStore(new PostgresAsyncContext(Literal, configPrefix = "db"))
 }

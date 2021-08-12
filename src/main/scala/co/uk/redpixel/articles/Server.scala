@@ -1,10 +1,12 @@
 package co.uk.redpixel.articles
 
+import cats.effect.std.Dispatcher
 import cats.effect.{Async, Resource}
 import cats.syntax.all._
 import co.uk.redpixel.articles.config.ApplicationConfig
 import co.uk.redpixel.articles.persistence.{Database, QuillHeadlinesStore}
 import co.uk.redpixel.articles.routes.{GraphQL, HealthCheck}
+import co.uk.redpixel.articles.schema.QuerySchema
 import com.comcast.ip4s._
 import fs2.Stream
 import org.http4s.ember.server.EmberServerBuilder
@@ -21,11 +23,15 @@ object NewYorkTimesArticlesServer {
       // database
       _  <- Stream.eval(Database.createSchema[F](config.db))
 
-      newsStore = QuillHeadlinesStore[F]()
+      headlines = QuillHeadlinesStore[F]()
+
+      // GraphQL
+      dispatcher <- Stream.resource(Dispatcher[F])
+      schema = QuerySchema(dispatcher)
 
       // routes
       routes = (
-        HealthCheck.routes[F](newsStore) <+>
+        HealthCheck.routes[F](headlines) <+>
         GraphQL.routes[F]()
       ).orNotFound
 
