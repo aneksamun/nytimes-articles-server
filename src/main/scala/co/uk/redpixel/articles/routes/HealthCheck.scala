@@ -16,7 +16,7 @@ object HealthCheck {
     import dsl._
     HttpRoutes.of[F] {
       case GET -> Root / "internal" / "status" =>
-        store.healthy >>= { status =>
+        store.isHealthy >>= { status =>
           Ok(Json.obj("healthy" := status))
         }
     }

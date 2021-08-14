@@ -1,10 +1,10 @@
 package co.uk.redpixel.articles.algebra
 
-import co.uk.redpixel.articles.data.Headlines
+import co.uk.redpixel.articles.data.{Headlines, Limit, Offset}
 
 trait HeadlinesStore[F[_]] {
 
-  def healthy: F[Boolean]
+  def isHealthy: F[Boolean]
 
-  def listAll(): F[Seq[Headlines]]
+  def fetch(offset: Offset, limit: Limit): F[Seq[Headlines]]
 }
