@@ -23,6 +23,7 @@ lazy val root = (project in file("."))
       "org.http4s"            %% "http4s-dsl"           % Http4sVersion,
       "io.getquill"           %% "quill-async-postgres" % QuillVersion,
       "io.circe"              %% "circe-generic"        % CirceVersion,
+      "io.circe"              %% "circe-optics"         % CirceVersion,
       "com.github.pureconfig" %% "pureconfig"           % PureConfigVersion,
       "eu.timepit"            %% "refined-pureconfig"   % PureConfigRefinedVersion,
       "org.sangria-graphql"   %% "sangria"              % SangriaVersion,

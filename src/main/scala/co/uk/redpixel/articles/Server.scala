@@ -27,12 +27,13 @@ object NewYorkTimesArticlesServer {
 
       // GraphQL
       dispatcher <- Stream.resource(Dispatcher[F])
-      schema = QuerySchema(dispatcher)
+      schema      = QuerySchema(dispatcher)
+      graphQL     = SangriaGraphQL[F](schema, headlines)
 
       // routes
       routes = (
         HealthCheck.routes[F](headlines) <+>
-        GraphQL.routes[F]()
+        GraphQL.routes[F](graphQL)
       ).orNotFound
 
       // request logging
