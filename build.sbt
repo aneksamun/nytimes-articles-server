@@ -10,6 +10,8 @@ val KindProjectorVersion = "0.13.0"
 val BetterMonadicVersion = "0.3.1"
 val SangriaVersion = "2.1.3"
 val SangriaCirceVersion = "1.3.2"
+val ScalaScraperVersion = "2.2.1"
+val ScalaTestVersion = "3.2.9"
 
 lazy val root = (project in file("."))
   .settings(
@@ -28,6 +30,8 @@ lazy val root = (project in file("."))
       "eu.timepit"            %% "refined-pureconfig"   % PureConfigRefinedVersion,
       "org.sangria-graphql"   %% "sangria"              % SangriaVersion,
       "org.sangria-graphql"   %% "sangria-circe"        % SangriaCirceVersion,
+      "net.ruippeixotog"      %% "scala-scraper"        % ScalaScraperVersion,
+      "org.scalatest"         %% "scalatest"            % ScalaTestVersion          % Test,
       "ch.qos.logback"        %  "logback-classic"      % LogbackVersion,
       "org.flywaydb"          %  "flyway-core"          % FlywayVersion,
       "org.postgresql"        %  "postgresql"           % PostgresVersion
@@ -49,10 +53,10 @@ scalacOptions ++= Seq(
   "-Xfatal-warnings",
   "-Ywarn-dead-code",
   "-Ywarn-extra-implicit",
-  "-Ywarn-unused:implicits",
-  "-Ywarn-unused:imports",
-  "-Ywarn-unused:locals",
-  "-Ywarn-unused:params",
-  "-Ywarn-unused:privates",
+//  "-Ywarn-unused:implicits",
+//  "-Ywarn-unused:imports",
+//  "-Ywarn-unused:locals",
+//  "-Ywarn-unused:params",
+//  "-Ywarn-unused:privates",
   "-Ywarn-value-discard"
 )

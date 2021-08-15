@@ -1,11 +1,11 @@
 package co.uk.redpixel.articles.schema
 
-import co.uk.redpixel.articles.data.Headlines
+import co.uk.redpixel.articles.data.Headline
 import sangria.schema.{Field, ObjectType, OptionType, StringType, fields}
 
 object NewsType {
 
-  def apply(): ObjectType[Unit, Headlines] =
+  def apply(): ObjectType[Unit, Headline] =
     ObjectType(
       name = "News",
       fields = fields(
