@@ -27,7 +27,7 @@ object Scraper {
     def repeatEvery(repeatInterval: FiniteDuration): Builder =
       copy(repeatInterval = repeatInterval)
 
-    def update[F[_] : Concurrent : Logger](store: HeadlineStore[F])(implicit t: Temporal[F]): F[Fiber[F, Throwable, Unit]] = {
+    def update[F[_] : Logger](store: HeadlineStore[F])(implicit t: Temporal[F]): F[Fiber[F, Throwable, Unit]] = {
 
       def loadPage = JsoupBrowser().get(scrapeUrl.toString)
 
@@ -53,7 +53,7 @@ object Scraper {
              .evalMap(store add _)
              .evalTap(total =>
                Logger[F] info s"Updated: $total")
-             .evalTap(_ => Concurrent[F].sleep(5 seconds))
+             .evalTap(_ => Concurrent[F] sleep repeatInterval)
             .repeat
             .compile
             .drain.void
