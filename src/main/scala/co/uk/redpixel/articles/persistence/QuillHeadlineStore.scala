@@ -2,6 +2,7 @@ package co.uk.redpixel.articles.persistence
 
 import cats.effect.Async
 import cats.syntax.all._
+import co.uk.redpixel.articles.algebra.HeadlineStore.Total
 import co.uk.redpixel.articles.algebra.HeadlineStore
 import co.uk.redpixel.articles.data.{Headline, Limit, Offset}
 import com.github.mauricio.async.db.util.ExecutorServiceUtils._
@@ -22,14 +23,19 @@ class QuillHeadlineStore[F[_] : Async, N <: NamingStrategy] private(ctx: Postgre
 
   def fetch(offset: Offset, limit: Limit): F[Seq[Headline]] = Async[F].fromFuture {
     Async[F] delay ctx.run(quote {
-      query[Headline].drop(lift(offset.value)).take(lift(limit.value)).sortBy(_.title)
+      querySchema[Headline]("headlines")
+        .drop(lift(offset.value))
+        .take(lift(limit.value))
+        .sortBy(_.title)
     })
   }
 
-  def add(headlines: Seq[Headline]): F[Seq[Long]] = Async[F].fromFuture {
+  def add(articles: Seq[Headline]): F[Total] = Async[F].fromFuture {
     Async[F] delay ctx.run(quote {
-      liftQuery(headlines).foreach(query.insert(_).onConflictIgnore)
-    })
+      liftQuery(articles).foreach(
+        querySchema[Headline]("headlines").insert(_).onConflictIgnore
+      )
+    }).map(_.sum)
   }
 }
 

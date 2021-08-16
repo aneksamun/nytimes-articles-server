@@ -1,5 +1,6 @@
 package co.uk.redpixel.articles.algebra
 
+import co.uk.redpixel.articles.algebra.HeadlineStore.Total
 import co.uk.redpixel.articles.data.{Headline, Limit, Offset}
 
 /** An algebra of operations in F that executes database requests. */
@@ -27,5 +28,9 @@ trait HeadlineStore[F[_]] {
     * @param headlines a batch of the headlines to persist
     * @return operation success or error
     */
-  def add(headlines: Seq[Headline]): F[Seq[Long]]
+  def add(headlines: Seq[Headline]): F[Total]
+}
+
+object HeadlineStore {
+  type Total = Long
 }

@@ -46,15 +46,17 @@ object Scraper {
       }
 
       Logger[F].info(s"Scraping headlines from New York Times...") *>
-        Concurrent[F].start((
-          fs2.Stream.awakeEvery[F](repeatInterval) >> fs2.Stream(loadPage |> extractHeadlines)
+        Concurrent[F].start(
+          fs2.Stream(loadPage |> extractHeadlines)
              .evalTap(headlines =>
                Logger[F] info s"Total collected: ${headlines.length}")
              .evalMap(store add _)
-             .evalTap(count =>
-               Logger[F].info(s"Updated: ${count.sum}"))
-          )
-          .compile.drain.void
+             .evalTap(total =>
+               Logger[F] info s"Updated: $total")
+             .evalTap(_ => Concurrent[F].sleep(5 seconds))
+            .repeat
+            .compile
+            .drain.void
         )
     }
   }
