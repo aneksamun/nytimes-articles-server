@@ -14,7 +14,7 @@ val ScalaScraperVersion = "2.2.1"
 val ScalaTestVersion = "3.2.9"
 val ScalaTestScalaCheckVersion = "3.1.0.0-RC2"
 val TestContainerVersion = "0.39.5"
-val MockServerClientVersion = "5.11.2"
+val MockServerClientVersion = "5.8.1"
 
 lazy val root = (project in file("."))
   .settings(
