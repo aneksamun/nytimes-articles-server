@@ -1,11 +1,9 @@
 package co.uk.redpixel.articles.support.fixture
 
 import cats.effect.IO
-import cats.effect.unsafe.IORuntime.global
 import co.uk.redpixel.articles.algebra.HeadlineStore
 import co.uk.redpixel.articles.scrape.Scraper
 import co.uk.redpixel.articles.support.Resources
-import com.dimafeng.testcontainers.MockServerContainer
 import org.http4s.Status.Ok
 import org.mockserver.client.MockServerClient
 import org.mockserver.model.HttpRequest.request
@@ -22,8 +20,8 @@ trait FakeNewYorkTimesServer extends Resources {
 
   implicit val logger = Slf4jLogger.getLogger[IO]
 
-  def configure(mock: MockServerContainer): URL = {
-    client = new MockServerClient(mock.container.getHost, mock.serverPort)
+  def setupNewYorkTimesServerMock: URL = {
+    val client = new MockServerClient(serverMock.container.getHost, serverMock.serverPort)
 
     client
       .when(request().withPath("/"))
@@ -34,18 +32,13 @@ trait FakeNewYorkTimesServer extends Resources {
           )
         ).withStatusCode(Ok.code))
 
-    new URL(mock.container.getEndpoint)
+    new URL(serverMock.container.getEndpoint)
   }
 
-  def update(headlines: HeadlineStore[IO])(scraper: Scraper.Builder): Unit = {
-    val scrapeAndStoreHeadlines = for {
+  def update(headlines: HeadlineStore[IO])(scraper: Scraper.Builder): IO[Unit] =
+    for {
       fiber <- scraper.update[IO](headlines).start
-      _ <- IO.sleep(3 seconds)
-      _ <- fiber.cancel
+      _     <- IO.sleep(3 seconds)
+      _     <- fiber.cancel
     } yield ()
-
-    scrapeAndStoreHeadlines.unsafeRunSync()(global)
-  }
-
-  var client: MockServerClient = _
 }

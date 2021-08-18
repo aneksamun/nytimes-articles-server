@@ -1,49 +1,45 @@
 package co.uk.redpixel.articles.support.fixture
 
 import co.uk.redpixel.articles.support.Resources
-import co.uk.redpixel.articles.support.fixture.ServerDependencies.Configuration
-import co.uk.redpixel.articles.support.fixture.ServerDependencies.Configuration._
+import co.uk.redpixel.articles.support.fixture.ServerDependencies.Database
 import com.dimafeng.testcontainers.lifecycle.and
 import com.dimafeng.testcontainers.scalatest.TestContainersForAll
 import com.dimafeng.testcontainers.{MockServerContainer, PostgreSQLContainer}
-import com.typesafe.config.{Config, ConfigFactory}
+import org.flywaydb.core.Flyway
 import org.scalatest.Suite
 import org.testcontainers.utility.DockerImageName
+import scalaz.Scalaz.ToIdOps
 
 trait ServerDependencies extends TestContainersForAll with Resources {
   this: Suite =>
+
+  lazy val database: PostgreSQLContainer = withContainers(_.head)
+  lazy val serverMock: MockServerContainer = withContainers(_.tail)
 
   override type Containers = PostgreSQLContainer and MockServerContainer
 
   override def startContainers(): Containers =
     PostgreSQLContainer.Def(
       dockerImageName = DockerImageName.parse("postgres:13.3-alpine"),
-      databaseName = Configuration.db.name,
-      username = Configuration.db.username,
-      password = Configuration.db.password
+      databaseName = Database.name,
+      username = Database.user,
+      password = Database.password
     ).start() and MockServerContainer.Def("5.8.1").start()
 
-  override def afterContainersStart(containers: Containers): Unit =
-    onceStarted(containers.tail)
-
-  override def beforeContainersStop(containers: PostgreSQLContainer and MockServerContainer): Unit =
-    onShutdown()
-
-  def onceStarted(container: MockServerContainer): Unit
-
-  def onShutdown(): Unit
+  override def afterContainersStart(containers: PostgreSQLContainer and MockServerContainer): Unit =
+    Flyway.configure()
+      .dataSource(containers.head.jdbcUrl, containers.head.username, containers.head.password)
+      .load()
+      .migrate()
+      .migrationsExecuted
+      .toString |> "Migration scripts executed: ".concat |> println
 }
 
 object ServerDependencies {
 
-  object Configuration {
-
-    val db: Config = ConfigFactory.load.getConfig("db")
-
-    implicit class DatabaseConfigOps(val config: Config) extends AnyVal {
-      def name: String = db.getString("database")
-      def username: String = db.getString("user")
-      def password: String = db.getString("password")
-    }
+  object Database {
+    val name = "nytimes-articles"
+    val user = "user"
+    val password = "1234"
   }
 }

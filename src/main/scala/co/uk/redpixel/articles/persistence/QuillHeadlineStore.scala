@@ -6,6 +6,7 @@ import co.uk.redpixel.articles.algebra.HeadlineStore.Total
 import co.uk.redpixel.articles.algebra.HeadlineStore
 import co.uk.redpixel.articles.data.{Headline, Limit, Offset}
 import com.github.mauricio.async.db.util.ExecutorServiceUtils._
+import com.typesafe.config.Config
 import io.getquill.{Literal, NamingStrategy, PostgresAsyncContext}
 
 import scala.concurrent.ExecutionContext
@@ -43,4 +44,7 @@ object QuillHeadlineStore {
 
   def apply[F[_]: Async](): HeadlineStore[F] =
     new QuillHeadlineStore(new PostgresAsyncContext(Literal, configPrefix = "db"))
+
+  def apply[F[_]: Async](config: Config): HeadlineStore[F] =
+    new QuillHeadlineStore(new PostgresAsyncContext(Literal, config))
 }
