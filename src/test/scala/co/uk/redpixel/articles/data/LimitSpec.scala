@@ -19,7 +19,7 @@ class LimitSpec extends AnyWordSpec
       }
     }
 
-    "fail for a valid less or equal to 0" in {
+    "fail for a value less or equal to 0" in {
       forAll(genNonPosNum[Int].map(Limit(_))) { limit =>
         val error = FieldError("limit", "Must be greater than 0")
         Limit.validator.validate(limit) shouldBe Some(NonEmptyList.of(error))

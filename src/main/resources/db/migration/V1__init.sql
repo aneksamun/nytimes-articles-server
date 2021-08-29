@@ -1,4 +1,4 @@
-DROP INDEX IF EXISTS headlines_lower_title_idx;
+DROP INDEX IF EXISTS headlines_title_idx;
 DROP TABLE IF EXISTS headlines;
 
 CREATE TABLE headlines
@@ -7,4 +7,4 @@ CREATE TABLE headlines
     title VARCHAR NOT NULL
 );
 
-CREATE INDEX headlines_lower_title_idx ON headlines ((lower(title)));
+CREATE INDEX headlines_title_idx ON headlines (title);
